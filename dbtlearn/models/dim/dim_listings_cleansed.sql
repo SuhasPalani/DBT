@@ -1,4 +1,9 @@
-WITH src_listings AS (
+{{
+  config(
+    materialized = 'view'
+    )
+}}
+    WITH src_listings AS (
   SELECT
     *
   FROM
