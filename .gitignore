@@ -1,5 +1,4 @@
 README.md
-dbtlearn/dbt_project.yml
 dbtlearn/analyses/.gitkeep
 dbtlearn/macros/.gitkeep
 dbtlearn/models/example/my_first_dbt_model.sql
@@ -9,3 +8,4 @@ dbtlearn/seeds/.gitkeep
 dbtlearn/snapshots/.gitkeep
 dbtlearn/tests/.gitkeep
 logs/dbt.log
+dbtlearn/dbt_project.yml
