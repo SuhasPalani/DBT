@@ -52,18 +52,61 @@ models:
       - dbt_expectations.expect_table_row_count_to_equal_other_table:
           compare_model: source('airbnb', 'listings')
     columns:
+      - name: listing_id
+        description: A unique identifier for each listing. This is a numeric field.
+        data_type: number
+      - name: listing_name
+        description: The name of the listing as provided by the host. This is a string
+          field.
+        data_type: varchar
+      - name: room_type
+        description: The type of room that is being listed. This is a string field and
+          can have values like 'Private Room', 'Entire Home/Apt', etc.
+        data_type: varchar
+      - name: minimum_nights
+        description: This field represents the minimum number of nights a guest can stay
+          at the listing. It is a numeric field.
+        data_type: number
       - name: price
+        data_type: number
+        description: This field represents the price per night for the listing. It is a
+          numeric field.
         tests:
-          - dbt_expectations.expect_column_values_to_be_of_type:
-              column_type: number
-          - dbt_expectations.expect_column_quantile_values_to_be_between:
-              quantile: 0.99
-              min_value: 50
-              max_value: 500
           - dbt_expectations.expect_column_max_to_be_between:
               max_value: 5000
               config:
                 severity: warn
+          - dbt_expectations.expect_column_quantile_values_to_be_between:
+              quantile: 0.99
+              min_value: 50
+              max_value: 500
+          - dbt_expectations.expect_column_values_to_be_of_type:
+              column_type: number
+      - name: host_id
+        description: This field represents the unique identifier for the host of the
+          listing. It is a numeric field.
+        data_type: number
+      - name: host_name
+        description: The name of the host for the listing. This is a string value that
+          is sourced from the 'dim_hosts_cleaned' table in the AIRBNB.DEV
+          schema.
+        data_type: varchar
+      - name: host_is_superhost
+        description: A flag indicating whether the host is a superhost or not. This is a
+          string value ('t' for true, 'f' for false) that is sourced from the
+          'dim_hosts_cleaned' table in the AIRBNB.DEV schema.
+        data_type: varchar
+      - name: created_at
+        description: The timestamp when the listing was created. This is a timestamp_ntz
+          value that is sourced from the 'dim_listings_cleansed' table in the
+          AIRBNB.DEV schema.
+        data_type: timestamp_ntz
+      - name: updated_at
+        description: This column represents the most recent timestamp when either the
+          listing or the host information was updated. It is derived from the
+          'updated_at' columns of both the 'dim_listings_cleansed' and
+          'dim_hosts_cleaned' models, taking the latest of the two timestamps.
+        data_type: timestamp_ntz
   - name: fct_reviews
     columns:
       - name: listing_id
