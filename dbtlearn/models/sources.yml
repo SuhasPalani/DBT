@@ -1,5 +1,4 @@
 version: 2
-
 sources:
   - name: airbnb
     schema: raw
@@ -14,13 +13,52 @@ sources:
           - name: price
             tests:
               - dbt_expectations.expect_column_values_to_match_regex:
-                  regex: "^\\\\$[0-9][0-9\\\\.]+$"
+                  regex: ^\\$[0-9][0-9\\.]+$
       - name: hosts
         identifier: raw_hosts
-
       - name: reviews
         identifier: raw_reviews
         loaded_at_field: date
         freshness:
-          warn_after: {count: 1, period: hour}
-          error_after: {count: 24, period: hour}
+          warn_after:
+            count: 1
+            period: hour
+          error_after:
+            count: 24
+            period: hour
+models:
+  - name: mart_fullmoon_reviews
+    description: "The 'mart_fullmoon_reviews' model is a transformation of the
+      'fct_reviews' table from the 'AIRBNB.DEV' schema. It includes all columns
+      from the 'fct_reviews' table and adds a new column 'is_full_moon'. This
+      new column is determined by joining the 'fct_reviews' table with the
+      'seed_full_moon_dates' table, also from the 'AIRBNB.DEV' schema. If the
+      review date is one day after a full moon date, the 'is_full_moon' column
+      is set to 'full moon', otherwise it is set to 'not full moon'. The columns
+      in this model are: 'LISTING_ID' (number), 'REVIEW_DATE' (timestamp_ntz),
+      'REVIEWER_NAME' (varchar), 'REVIEW_TEXT' (varchar), 'REVIEW_SENTIMENT'
+      (varchar), and 'IS_FULL_MOON' (varchar)."
+    columns:
+      - name: listing_id
+        data_type: number
+        tests:
+          - unique
+      - name: review_date
+        data_type: timestamp_ntz
+        tests:
+          - relationships:
+              field: review_date
+      - name: reviewer_name
+        data_type: varchar
+      - name: review_text
+        data_type: varchar
+      - name: review_sentiment
+        data_type: varchar
+        tests:
+          - accepted_values:
+              values:
+                - negative
+                - neutral
+                - positive
+      - name: is_full_moon
+        data_type: varchar
