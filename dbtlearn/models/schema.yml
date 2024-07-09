@@ -1,16 +1,13 @@
 version: 2
-
 models:
   - name: dim_listings_cleansed
     description: Cleansed table which contains Airbnb listings.
     columns:
-
       - name: listing_id
         description: Primary key for the listing
         tests:
           - unique
           - not_null
-
       - name: host_id
         description: The hosts's id. References the host table.
         tests:
@@ -18,21 +15,19 @@ models:
           - relationships:
               to: ref('dim_hosts_cleaned')
               field: host_id
-
       - name: room_type
         description: Type of the apartment / room
         tests:
           - accepted_values:
-              values: ['Entire home/apt',
-                      'Private room',
-                      'Shared room',
-                      'Hotel room']
-
+              values:
+                - Entire home/apt
+                - Private room
+                - Shared room
+                - Hotel room
       - name: minimum_nights
         description: '{{ doc("dim_listing_cleansed__minimum_nights") }}'
         tests:
           - positive_value
-
   - name: dim_hosts_cleaned
     description: Cleansed table for the Airbnb hosts
     columns:
@@ -41,18 +36,17 @@ models:
         tests:
           - not_null
           - unique
-      
       - name: host_name
         description: The name of the host
         tests:
           - not_null
-      
       - name: is_superhost
         description: Defines whether the hosts is a superhost.
         tests:
           - accepted_values:
-              values: ['t', 'f']
-
+              values:
+                - t
+                - f
   - name: dim_listings_w_hosts
     tests:
       - dbt_expectations.expect_table_row_count_to_equal_other_table:
@@ -63,27 +57,46 @@ models:
           - dbt_expectations.expect_column_values_to_be_of_type:
               column_type: number
           - dbt_expectations.expect_column_quantile_values_to_be_between:
-              quantile: .99
+              quantile: 0.99
               min_value: 50
               max_value: 500
           - dbt_expectations.expect_column_max_to_be_between:
               max_value: 5000
               config:
                 severity: warn
-
   - name: fct_reviews
     columns:
       - name: listing_id
+        data_type: number
+        description: The unique identifier for each listing. This is a numeric field.
         tests:
           - relationships:
               to: ref('dim_listings_cleansed')
               field: listing_id
-
+      - name: review_date
+        description: The date when the review was made. This is a timestamp field.
+        data_type: timestamp_ntz
       - name: reviewer_name
+        data_type: varchar
+        description: The name of the person who made the review. This is a string field.
         tests:
           - not_null
-      
+      - name: review_text
+        description: This column contains the text of the review left by the guest. It
+          is a string type and can contain any characters. It is extracted from
+          the 'comments' column in the raw_reviews table.
+        data_type: varchar
       - name: review_sentiment
+        data_type: varchar
+        description: This column represents the sentiment of the review. It is a string
+          type and can contain values such as 'positive', 'negative', or
+          'neutral'. It is derived from the 'sentiment' column in the
+          raw_reviews table.
         tests:
           - accepted_values:
-              values: ['positive', 'neutral', 'negative']
+              values:
+                - negative
+                - neutral
+                - positive
+    description: |
+      sample description for fct_reviews model
